@@ -1,17 +1,7 @@
-import React, { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
-import toast from 'react-hot-toast'
-
-type User = {
-  id: string
-  name: string
-}
-
-type Selection = {
-  id: string
-  selected_id: string
-  count: number
-}
+import React, { useState, useEffect } from "react"
+import { supabase } from "../lib/supabase"
+import toast from "react-hot-toast"
+import { User, Selection, fetchUsers, fetchSelections, chooseReviewer, updateSelection } from "../utils/reviewerUtils"
 
 type ReviewerChooserProps = {
   currentUser: User
@@ -22,15 +12,20 @@ const ReviewerChooser: React.FC<ReviewerChooserProps> = ({ currentUser }) => {
   const [selections, setSelections] = useState<Selection[]>([])
 
   useEffect(() => {
-    fetchUsers()
-    fetchSelections()
+    const loadData = async () => {
+      const [fetchedUsers, fetchedSelections] = await Promise.all([fetchUsers(currentUser.id), fetchSelections(currentUser.id)])
+      setUsers(fetchedUsers)
+      setSelections(fetchedSelections)
+    }
+    loadData()
+
     const usersSubscription = supabase
-      .channel('users_channel')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, fetchUsers)
+      .channel("users_channel")
+      .on("postgres_changes", { event: "*", schema: "public", table: "users" }, () => loadData())
       .subscribe()
     const selectionsSubscription = supabase
-      .channel('selections_channel')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'selections' }, fetchSelections)
+      .channel("selections_channel")
+      .on("postgres_changes", { event: "*", schema: "public", table: "selections" }, () => loadData())
       .subscribe()
 
     return () => {
@@ -39,109 +34,53 @@ const ReviewerChooser: React.FC<ReviewerChooserProps> = ({ currentUser }) => {
     }
   }, [currentUser.id])
 
-  const fetchUsers = async () => {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .neq('id', currentUser.id)
-      .eq('is_archived', false)
-    if (error) console.error('Error fetching users:', error)
-    else setUsers(data || [])
-  }
-
-  const fetchSelections = async () => {
-    const { data, error } = await supabase
-      .from('selections')
-      .select('*')
-      .eq('selector_id', currentUser.id)
-    if (error) console.error('Error fetching selections:', error)
-    else setSelections(data || [])
-  }
-
-  const chooseReviewer = async () => {
-    const sortedUsers = users.sort((a, b) => {
-      const countA = selections.find(s => s.selected_id === a.id)?.count || 0
-      const countB = selections.find(s => s.selected_id === b.id)?.count || 0
-      return countA - countB
-    })
-
-    const chosenUser = sortedUsers[0]
+  const handleChooseReviewer = async () => {
+    const chosenUser = chooseReviewer(users, selections)
     if (!chosenUser) {
-      toast.error('No available reviewers')
+      toast.error("No available reviewers")
       return
     }
 
-    const existingSelection = selections.find(s => s.selected_id === chosenUser.id)
-    if (existingSelection) {
-      const { error } = await supabase
-        .from('selections')
-        .update({ count: existingSelection.count + 1 })
-        .eq('id', existingSelection.id)
-      if (error) {
-        console.error('Error updating selection:', error)
-        toast.error('Failed to choose reviewer')
-      } else {
-        toast.success(`${chosenUser.name} has been chosen as your reviewer`)
-      }
+    const success = await updateSelection(currentUser.id, chosenUser.id, 1)
+    if (success) {
+      toast.success(`${chosenUser.name} has been randomly chosen as your reviewer`)
+      setSelections(await fetchSelections(currentUser.id))
     } else {
-      const { error } = await supabase
-        .from('selections')
-        .insert({ selector_id: currentUser.id, selected_id: chosenUser.id, count: 1 })
-      if (error) {
-        console.error('Error creating selection:', error)
-        toast.error('Failed to choose reviewer')
-      } else {
-        toast.success(`${chosenUser.name} has been chosen as your reviewer`)
-      }
+      toast.error("Failed to choose reviewer")
     }
   }
 
-  const updateCount = async (userId: string, increment: number) => {
-    const selection = selections.find(s => s.selected_id === userId)
-    if (selection) {
-      const newCount = Math.max(0, selection.count + increment)
-      const { error } = await supabase
-        .from('selections')
-        .update({ count: newCount })
-        .eq('id', selection.id)
-      if (error) {
-        console.error('Error updating count:', error)
-        toast.error('Failed to update count')
-      }
-    } else if (increment > 0) {
-      const { error } = await supabase
-        .from('selections')
-        .insert({ selector_id: currentUser.id, selected_id: userId, count: 1 })
-      if (error) {
-        console.error('Error creating selection:', error)
-        toast.error('Failed to update count')
-      }
+  const handleUpdateCount = async (userId: string, increment: number) => {
+    const success = await updateSelection(currentUser.id, userId, increment)
+    if (success) {
+      setSelections(await fetchSelections(currentUser.id))
+    } else {
+      toast.error("Failed to update count")
     }
   }
 
   return (
     <div className="space-y-6">
-      <button
-        onClick={chooseReviewer}
-        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Choose a Reviewer
+      <button onClick={handleChooseReviewer} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+        Choose a Random Reviewer
       </button>
       <div className="space-y-4">
-        {users.map(user => {
-          const count = selections.find(s => s.selected_id === user.id)?.count || 0
+        {users.map((user) => {
+          const count = selections.find((s) => s.selected_id === user.id)?.count || 0
           return (
             <div key={user.id} className="flex items-center justify-between">
-              <span>{user.name}: {count}</span>
+              <span>
+                {user.name}: {count}
+              </span>
               <div>
                 <button
-                  onClick={() => updateCount(user.id, -1)}
+                  onClick={() => handleUpdateCount(user.id, -1)}
                   className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded mr-2"
                 >
                   -
                 </button>
                 <button
-                  onClick={() => updateCount(user.id, 1)}
+                  onClick={() => handleUpdateCount(user.id, 1)}
                   className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
                 >
                   +
