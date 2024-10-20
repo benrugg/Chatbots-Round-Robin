@@ -9,5 +9,4 @@ module.exports = {
     },
   },
   plugins: [],
-  safelist: ["bg-yellow-100", "border-2", "border-yellow-300", "font-bold", "text-sm", "text-yellow-600", "ml-2"],
 }
