@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react"
+import { twMerge } from "tailwind-merge"
 import { supabase } from "../lib/supabase"
 import toast from "react-hot-toast"
 import { User, Selection, fetchUsers, fetchSelections, chooseReviewer, updateSelection } from "../utils/reviewerUtils"
@@ -73,29 +74,11 @@ const ReviewerChooser: React.FC<ReviewerChooserProps> = ({ currentUser }) => {
           return (
             <div
               key={user.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "0.5rem",
-                borderRadius: "0.25rem",
-                backgroundColor: isLastChosen ? "#fef9c3" : "transparent",
-                border: isLastChosen ? "2px solid #fde047" : "none",
-              }}
+              className={twMerge("flex items-center justify-between p-2 rounded", isLastChosen && "bg-yellow-100 border-2 border-yellow-300")}
             >
-              <span style={{ fontWeight: isLastChosen ? "bold" : "normal" }}>
+              <span className={twMerge("text-base", isLastChosen && "font-bold")}>
                 {user.name}: {count}
-                {isLastChosen && (
-                  <span
-                    style={{
-                      marginLeft: "0.5rem",
-                      fontSize: "0.875rem",
-                      color: "#ca8a04",
-                    }}
-                  >
-                    (Last chosen)
-                  </span>
-                )}
+                {isLastChosen && <span className="ml-2 text-sm text-yellow-600">(Last chosen)</span>}
               </span>
               <div>
                 <button
