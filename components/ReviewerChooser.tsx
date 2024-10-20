@@ -10,6 +10,7 @@ type ReviewerChooserProps = {
 const ReviewerChooser: React.FC<ReviewerChooserProps> = ({ currentUser }) => {
   const [users, setUsers] = useState<User[]>([])
   const [selections, setSelections] = useState<Selection[]>([])
+  const [lastChosenReviewer, setLastChosenReviewer] = useState<string | null>(null)
 
   useEffect(() => {
     const loadData = async () => {
@@ -45,6 +46,7 @@ const ReviewerChooser: React.FC<ReviewerChooserProps> = ({ currentUser }) => {
     if (success) {
       toast.success(`${chosenUser.name} has been randomly chosen as your reviewer`)
       setSelections(await fetchSelections(currentUser.id))
+      setLastChosenReviewer(chosenUser.id)
     } else {
       toast.error("Failed to choose reviewer")
     }
@@ -67,10 +69,33 @@ const ReviewerChooser: React.FC<ReviewerChooserProps> = ({ currentUser }) => {
       <div className="space-y-4">
         {users.map((user) => {
           const count = selections.find((s) => s.selected_id === user.id)?.count || 0
+          const isLastChosen = user.id === lastChosenReviewer
           return (
-            <div key={user.id} className="flex items-center justify-between">
-              <span>
+            <div
+              key={user.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "0.5rem",
+                borderRadius: "0.25rem",
+                backgroundColor: isLastChosen ? "#fef9c3" : "transparent",
+                border: isLastChosen ? "2px solid #fde047" : "none",
+              }}
+            >
+              <span style={{ fontWeight: isLastChosen ? "bold" : "normal" }}>
                 {user.name}: {count}
+                {isLastChosen && (
+                  <span
+                    style={{
+                      marginLeft: "0.5rem",
+                      fontSize: "0.875rem",
+                      color: "#ca8a04",
+                    }}
+                  >
+                    (Last chosen)
+                  </span>
+                )}
               </span>
               <div>
                 <button
