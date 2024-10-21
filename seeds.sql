@@ -36,21 +36,21 @@ ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.selections ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for users table
-CREATE POLICY "Allow public read access" ON public.users
-    FOR SELECT USING (true);
+-- CREATE POLICY "Allow public read access" ON public.users
+--     FOR SELECT USING (true);
 
-CREATE POLICY "Allow authenticated insert access" ON public.users
-    FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+-- CREATE POLICY "Allow authenticated insert access" ON public.users
+--     FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
-CREATE POLICY "Allow users to update their own data" ON public.users
-    FOR UPDATE USING (auth.uid() = id);
+-- CREATE POLICY "Allow users to update their own data" ON public.users
+--     FOR UPDATE USING (auth.uid() = id);
 
--- Create policies for selections table
-CREATE POLICY "Allow authenticated read access" ON public.selections
-    FOR SELECT USING (auth.role() = 'authenticated');
+-- -- Create policies for selections table
+-- CREATE POLICY "Allow authenticated read access" ON public.selections
+--     FOR SELECT USING (auth.role() = 'authenticated');
 
-CREATE POLICY "Allow authenticated insert access" ON public.selections
-    FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+-- CREATE POLICY "Allow authenticated insert access" ON public.selections
+--     FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
-CREATE POLICY "Allow users to update their own selections" ON public.selections
-    FOR UPDATE USING (auth.uid() = selector_id);
+-- CREATE POLICY "Allow users to update their own selections" ON public.selections
+--     FOR UPDATE USING (auth.uid() = selector_id);
