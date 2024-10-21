@@ -6,9 +6,10 @@ import { User, Selection, fetchUsers, fetchSelections, chooseReviewer, updateSel
 
 type ReviewerChooserProps = {
   currentUser: User
+  onUserChosen: Function
 }
 
-const ReviewerChooser: React.FC<ReviewerChooserProps> = ({ currentUser }) => {
+const ReviewerChooser: React.FC<ReviewerChooserProps> = ({ currentUser, onUserChosen }) => {
   const [users, setUsers] = useState<User[]>([])
   const [selections, setSelections] = useState<Selection[]>([])
   const [lastChosenReviewer, setLastChosenReviewer] = useState<string | null>(null)
@@ -46,6 +47,7 @@ const ReviewerChooser: React.FC<ReviewerChooserProps> = ({ currentUser }) => {
     const success = await updateSelection(currentUser.id, chosenUser.id, 1)
     if (success) {
       toast.success(`${chosenUser.name} has been randomly chosen as your reviewer`)
+      onUserChosen()
       setSelections(await fetchSelections(currentUser.id))
       setLastChosenReviewer(chosenUser.id)
     } else {
