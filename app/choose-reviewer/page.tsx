@@ -16,10 +16,10 @@ export default function ChooseReviewer() {
       <Header currentUser={user} onSignOut={signOut} />
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">Choose a Reviewer</h1>
+          <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Choose a Reviewer</h1>
           <ReviewerChooser currentUser={user} />
           <div className="mt-8 flex justify-between">
-            <Link href="/manage-team" className="text-blue-500 hover:text-blue-700">
+            <Link href="/manage-team" className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
               Manage Team
             </Link>
           </div>

@@ -64,7 +64,10 @@ const ReviewerChooser: React.FC<ReviewerChooserProps> = ({ currentUser }) => {
 
   return (
     <div className="space-y-6">
-      <button onClick={handleChooseReviewer} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+      <button
+        onClick={handleChooseReviewer}
+        className="bg-green-500 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-800 text-white font-bold py-2 px-4 rounded"
+      >
         Choose a Random Reviewer
       </button>
       <div className="space-y-4">
@@ -74,22 +77,25 @@ const ReviewerChooser: React.FC<ReviewerChooserProps> = ({ currentUser }) => {
           return (
             <div
               key={user.id}
-              className={twMerge("flex items-center justify-between p-2 rounded", isLastChosen && "bg-yellow-100 border-2 border-yellow-300")}
+              className={twMerge(
+                "flex items-center justify-between p-2 rounded",
+                isLastChosen ? "bg-yellow-100 dark:bg-yellow-900 border-2 border-yellow-300 dark:border-yellow-700" : "",
+              )}
             >
-              <span className={twMerge("text-base", isLastChosen && "font-bold")}>
+              <span className={twMerge("text-gray-900 dark:text-gray-100", isLastChosen && "font-bold")}>
                 {user.name}: {count}
-                {isLastChosen && <span className="ml-2 text-sm text-yellow-600">(Last chosen)</span>}
+                {isLastChosen && <span className="ml-2 text-sm text-yellow-600 dark:text-yellow-400">(Last chosen)</span>}
               </span>
               <div>
                 <button
                   onClick={() => handleUpdateCount(user.id, -1)}
-                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded mr-2"
+                  className="bg-red-500 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-800 text-white font-bold py-1 px-2 rounded mr-2"
                 >
                   -
                 </button>
                 <button
                   onClick={() => handleUpdateCount(user.id, 1)}
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
+                  className="bg-blue-500 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-800 text-white font-bold py-1 px-2 rounded"
                 >
                   +
                 </button>

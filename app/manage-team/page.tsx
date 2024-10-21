@@ -16,10 +16,10 @@ export default function ManageTeam() {
       <Header currentUser={user} onSignOut={signOut} />
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">Manage Team</h1>
+          <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Manage Team</h1>
           <UserManager />
           <div className="mt-8 flex justify-between">
-            <Link href="/choose-reviewer" className="text-blue-500 hover:text-blue-700">
+            <Link href="/choose-reviewer" className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
               Choose a Reviewer
             </Link>
           </div>
